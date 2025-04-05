@@ -1,4 +1,11 @@
+```markdown
+# ⚙️ Simple C++ Expression Compiler with Flex & Bison
+
 This project demonstrates a **basic compiler implementation** using **Flex & Bison in C++**, capable of parsing arithmetic expressions and generating **Three Address Code** and **custom instructions** (like `MIXMUL`). 
+
+Perfect for compiler design projects and learning purposes!
+
+---
 
 ## 📥 Installation Guide (Windows with MSYS2)
 
@@ -19,48 +26,64 @@ pacman -S base-devel gcc     # Install base tools and C++ compiler
 pacman -S flex bison         # Install Flex & Bison
 pacman -S git                # (Optional) Version control
 pacman -S cmake              # (Optional) Build tools
-
-**`README.md`** tailored for the **single-file C++ compiler project** using **Flex & Bison**, ready to upload to GitHub:
-
-
-# 🛠️ Simple C++ Compiler using Flex & Bison
-
-This project is a basic **expression compiler** built in **C++ using Flex and Bison**, supporting custom instruction generation such as `MIXMUL`. It simulates the key stages of a compiler: tokenization, parsing, intermediate code generation (Three Address Code), and simple optimization.
+```
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Files
 
-```
+```bash
 .
-├── compiler.y        # Bison file (parser + main + semantic actions)
-├── lexer.l           # Flex file (lexer)
-├── Makefile          # Build instructions
-├── output.asm        # Final simulated assembly output
-├── README.md         # You're reading it!
+├── compiler.y        # Combined Bison (parser + logic)
+├── lexer.l           # Flex lexer
+├── Makefile          # Build configuration
+├── output.asm        # Generated assembly file
+├── README.md         # This file
 ```
 
 ---
 
-## 🚀 Features
+## 💡 What It Does
 
-- ✅ Lexical analysis using **Flex**
-- ✅ Parsing expressions with **Bison**
-- ✅ Generates **Three Address Code (TAC)**
-- ✅ Detects patterns like `A * B + 1` and outputs custom instruction: `MIXMUL`
-- ✅ Writes final simulated assembly to `output.asm`
+- Parses expressions like `X = A * B + 1;`
+- Generates **Three Address Code (TAC)**
+- Detects optimized patterns (e.g., `A * B + 1`)
+- Outputs a **custom instruction** (`MIXMUL`)
+- Simulates final assembly code output
 
 ---
 
-## 📥 Example Input
+## 🧱 Build Instructions
+
+### ✅ Step 1: Compile the Compiler
+
+Open MSYS2 terminal inside your project folder and run:
+
+```bash
+make
+```
+
+### ▶️ Step 2: Run the Compiler
+
+```bash
+./mycompiler
+```
+
+---
+
+## 🧪 Example Input
+
+When prompted:
 
 ```c
 X = M * N + 1;
 ```
 
-### 💻 Compiler Output
+---
 
-```
+## 🖨️ Sample Output
+
+```bash
 [Three Address Code]
 t1 = M * N
 t2 = t1 + 1
@@ -75,47 +98,7 @@ MIXMUL X = M * N + 1
 
 ---
 
-## 🏗️ How to Build & Run
-
-### ⚙️ Requirements
-- A C++ compiler (`g++`)
-- `flex` and `bison` installed
-- Linux/MacOS or Windows with **MSYS2**/MinGW
-
-### 🔧 Build
-
-In terminal:
-
-```bash
-make
-```
-
-### ▶️ Run
-
-```bash
-./mycompiler
-```
-
-Then input a statement like:
-
-```c
-X = M * N + 1;
-```
-
----
-
-## 💡 How It Works
-
-- **Flex** reads the input and breaks it into tokens (identifiers, numbers, operators).
-- **Bison** parses the expression grammar and uses embedded C++ actions to:
-  - Build **three-address code**
-  - Detect if an expression matches a pattern like `A * B + 1`
-  - Print a **custom instruction** like `MIXMUL`
-  - Write the output to `output.asm`
-
----
-
-## 📝 Sample `output.asm`
+## 📝 Generated `output.asm`
 
 ```asm
 t1 = M * N
@@ -126,11 +109,29 @@ STORE X
 
 ---
 
-## 🧾 License
+## 🧠 Bonus Ideas
 
-Free to use and modify for learning or academic purposes.
-```
+- Add support for more operators: `-`, `/`, `^`
+- Add parentheses and nesting: `(A + B) * C`
+- Implement symbol tables or constant folding
+- Build a GUI in Qt/C++ or web front-end
 
 ---
 
-Let me know if you want this converted into a GitHub README with badges, or styled for a class/assignment submission!
+## 🙋 FAQ
+
+**Q: I'm getting 'g++ not found'?**  
+> Make sure you installed `gcc` with `pacman -S base-devel gcc`.
+
+**Q: Where is my output?**  
+> Look for `output.asm` in the same folder.
+
+---
+
+## 📜 License
+
+This project is open-source and free to use for educational and academic purposes.
+
+---
+
+]
