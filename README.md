@@ -30,7 +30,7 @@ pacman -S cmake              # (Optional) Build tools
 
 ```bash
 .
-├── compiler.y        # Combined Bison (parser + logic)
+├── parser.y        # Combined Bison (parser + logic)
 ├── lexer.l           # Flex lexer
 ├── Makefile          # Build configuration
 ├── output.asm        # Generated assembly file
