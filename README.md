@@ -120,9 +120,6 @@ STORE X
 
 ## 🙋 FAQ
 
-**Q: I'm getting 'g++ not found'?**  
-> Make sure you installed `gcc` with `pacman -S base-devel gcc`.
-
 **Q: Where is my output?**  
 > Look for `output.asm` in the same folder.
 
@@ -134,4 +131,3 @@ This project is open-source and free to use for educational and academic purpose
 
 ---
 
-]
