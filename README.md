@@ -1,4 +1,3 @@
-```markdown
 # ⚙️ Simple C++ Expression Compiler with Flex & Bison
 
 This project demonstrates a **basic compiler implementation** using **Flex & Bison in C++**, capable of parsing arithmetic expressions and generating **Three Address Code** and **custom instructions** (like `MIXMUL`). 
