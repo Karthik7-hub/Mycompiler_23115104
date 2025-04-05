@@ -5,7 +5,6 @@ This project demonstrates a **basic compiler implementation** using **Flex & Bis
 
 Perfect for compiler design projects and learning purposes!
 
----
 
 ## 📥 Installation Guide (Windows with MSYS2)
 
@@ -16,7 +15,6 @@ Perfect for compiler design projects and learning purposes!
 
 Make sure to follow all steps on the site including initialization!
 
----
 
 ### 🛠️ Step 2: Open MSYS2 Terminal and Run These Commands
 
@@ -28,7 +26,6 @@ pacman -S git                # (Optional) Version control
 pacman -S cmake              # (Optional) Build tools
 ```
 
----
 
 ## 📂 Project Files
 
@@ -41,7 +38,6 @@ pacman -S cmake              # (Optional) Build tools
 ├── README.md         # This file
 ```
 
----
 
 ## 💡 What It Does
 
@@ -69,7 +65,6 @@ make
 ./mycompiler
 ```
 
----
 
 ## 🧪 Example Input
 
@@ -79,7 +74,6 @@ When prompted:
 X = M * N + 1;
 ```
 
----
 
 ## 🖨️ Sample Output
 
@@ -96,7 +90,6 @@ MIXMUL X = M * N + 1
 [Assembly Written to output.asm]
 ```
 
----
 
 ## 📝 Generated `output.asm`
 
@@ -106,8 +99,6 @@ t2 = t1 + 1
 X = t2
 STORE X
 ```
-
----
 
 
 ## 🙋 FAQ
