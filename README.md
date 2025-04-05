@@ -1,15 +1,25 @@
-First install MSYS2 terminal in the sysstem
-https://www.msys2.org/wiki/MSYS2-installation/
-Use this link to install the terminal
+This project demonstrates a **basic compiler implementation** using **Flex & Bison in C++**, capable of parsing arithmetic expressions and generating **Three Address Code** and **custom instructions** (like `MIXMUL`). 
 
-After the installation
-Follow these commands
-   pacman -Su
-   pacman -S base-devel gcc
-   pacman -S flex bison
-   pacman -S git
-   pacman -S cmake
-___________________________After the Set Up of Terminal_______________________________________
+## 📥 Installation Guide (Windows with MSYS2)
+
+### 🔧 Step 1: Install MSYS2 Terminal
+
+👉 Download & install MSYS2 from the official link:  
+**🔗 https://www.msys2.org/wiki/MSYS2-installation/**
+
+Make sure to follow all steps on the site including initialization!
+
+---
+
+### 🛠️ Step 2: Open MSYS2 Terminal and Run These Commands
+
+```bash
+pacman -Su                   # Update all packages
+pacman -S base-devel gcc     # Install base tools and C++ compiler
+pacman -S flex bison         # Install Flex & Bison
+pacman -S git                # (Optional) Version control
+pacman -S cmake              # (Optional) Build tools
+
 **`README.md`** tailored for the **single-file C++ compiler project** using **Flex & Bison**, ready to upload to GitHub:
 
 
