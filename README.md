@@ -109,19 +109,12 @@ STORE X
 
 ---
 
-## 🧠 Bonus Ideas
-
-- Add support for more operators: `-`, `/`, `^`
-- Add parentheses and nesting: `(A + B) * C`
-- Implement symbol tables or constant folding
-- Build a GUI in Qt/C++ or web front-end
-
----
 
 ## 🙋 FAQ
 
 **Q: Where is my output?**  
 > Look for `output.asm` in the same folder.
+> if any other doubts you can verify through the screenshots once.
 
 ---
 
@@ -130,4 +123,3 @@ STORE X
 This project is open-source and free to use for educational and academic purposes.
 
 ---
-
