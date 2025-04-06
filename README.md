@@ -1,10 +1,14 @@
-# ⚙️ Simple C++ Expression Compiler with Flex & Bison
+# Arithmetic Expression Compiler
 
-This project demonstrates a **basic compiler implementation** using **Flex & Bison in C++**, capable of parsing arithmetic expressions and generating **Three Address Code** and **custom instructions** (like `MIXMUL`). 
+This project is a simple compiler that takes arithmetic expressions and generates:
 
-Perfect for compiler design projects and learning purposes!
+- ✅ Three Address Code (TAC)
+- ⚙️ Optimized Custom Instructions (like `MIXMUL`, `MIXMUL_SUB`)
+- 🖥️ Register-based Assembly Output
 
+Built using **Flex** and **Bison** in C++. The compiler can detect specific patterns for optimization and simulate a register machine.
 
+---
 ## 📥 Installation Guide (Windows with MSYS2)
 
 ### 🔧 Step 1: Install MSYS2 Terminal
@@ -26,90 +30,85 @@ pacman -S cmake              # (Optional) Build tools
 ```
 
 
-## 📂 Project Files
+## 🛠 Build Instructions
 
-```bash
-.
-├── parser.y          # Combined Bison (parser + logic)
-├── lexer.l           # Flex lexer
-├── Makefile          # Build configuration
-├── output.asm        # Generated assembly file
-├── README.md         # This file
-```
-
-
-## 💡 What It Does
-
-- Parses expressions like `X = A * B + 1;`
-- Generates **Three Address Code (TAC)**
-- Detects optimized patterns (e.g., `A * B + 1`)
-- Outputs a **custom instruction** (`MIXMUL`)
-- Simulates final assembly code output
-
----
-
-## 🧱 Build Instructions
-
-### ✅ Step 1: Compile the Compiler
-
-Open MSYS2 terminal inside your project folder and run:
+Make sure **Flex**, **Bison**, and **g++** are installed.
 
 ```bash
 make
 ```
 
-### ▶️ Step 2: Run the Compiler
+It will:
+- Generate the parser and lexer files
+- Compile all source code
+- Create an executable called `mycompiler`
+
+---
+
+## 🚀 How to Use
+
+Run the program:
 
 ```bash
 ./mycompiler
 ```
 
+You will be prompted to enter an arithmetic expression like:
 
-## 🧪 Example Input
-
-When prompted:
-
-```c
-X = M * N + 1;
+```plaintext
+RESULT = (X1 * Y1 + 1) + (X2 * Y2 - 1);
 ```
 
+---
 
-## 🖨️ Sample Output
+## ✅ Example Output
 
-```bash
-[Three Address Code]
-t1 = M * N
-t2 = t1 + 1
-X = t2
+| Section | Output |
+|--------|--------|
+| **Input** | `RESULT = (X1 * Y1 + 1) + (X2 * Y2 - 1);` |
+| **Three Address Code** | `t1 = X1 * Y1`<br>`t2 = 1`<br>`t3 = t1 + t2`<br>`t4 = X2 * Y2`<br>`t5 = 1`<br>`t6 = t4 - t5`<br>`t7 = t3 + t6`<br>`RESULT = t7` |
+| **Optimized Instructions** | `MIXMUL R5 = t1 + t2`<br>`MIXMUL_SUB R10 = t4 - t5` |
+| **Assembly Code** | `MOV R1, X1`<br>`MOV R2, Y1`<br>`MUL R3, R1, R2`<br>`MOV R4, 1`<br>`ADD R5, R3, R4`<br>`MOV R6, X2`<br>`MOV R7, Y2`<br>`MUL R8, R6, R7`<br>`MOV R9, 1`<br>`SUB R10, R8, R9`<br>`MOV R11, R5`<br>`ADD R11, R11, R10`<br>`STORE RESULT, R11` |
 
-[Optimized Instructions]
-MIXMUL X = M * N + 1
+Assembly is also saved to `output.asm`.
 
-[Final Code]
-[Assembly Written to output.asm]
+---
+
+## 📁 Project Structure
+
+```
+.
+├── lexer.l         # Lexer (Flex)
+├── parser.y        # Parser + Code Gen (Bison)
+├── main.cpp        # Entry point
+├── Makefile        # Build script
+├── output.asm      # Assembly output
+└── README.md       # You're here!
 ```
 
+---
 
-## 📝 Generated `output.asm`
+## ⚙️ Optimization Details
 
-```asm
-t1 = M * N
-t2 = t1 + 1
-X = t2
-STORE X
-```
+| Pattern | Recognized As |
+|--------|----------------|
+| `X * Y + 1` | `MIXMUL` |
+| `X * Y - 1` | `MIXMUL_SUB` |
 
+These patterns are recognized during parsing and mapped to custom pseudo-instructions.
 
-## 🙋 FAQ
+---
+## 📸 Screenshots
+![Screenshot 2025-04-06 135048](https://github.com/user-attachments/assets/5efc9f64-25fd-4a2a-9691-9985dedfd36e)
+![Screenshot 2025-04-06 135057](https://github.com/user-attachments/assets/c27dd295-0a63-415a-aedb-95f7201376ad)
 
-**Q: Where is my output?**  
-> Look for `output.asm` in the same folder.
-> if any other doubts you can verify through the screenshots once.
-
+The above to are the of two examples
 ---
 
 ## 📜 License
 
-This project is open-source and free to use for educational and academic purposes.
+MIT License – feel free to use, modify, and enhance.
 
 ---
+
+
