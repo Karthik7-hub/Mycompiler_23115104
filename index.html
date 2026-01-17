@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cricket Scorer Pro V6</title>
+    <title>Cricket Scorer Pro V10</title>
     <style>
         :root {
             --primary: #2563eb; 
@@ -31,15 +31,14 @@
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg); color: var(--text);
             margin: 0; padding: 10px; display: flex; justify-content: center;
-            height: 100vh; overflow: hidden; /* Prevent body scroll */
+            height: 100vh; overflow: hidden;
         }
 
         .app-container {
             width: 100%; max-width: 420px; background: var(--card);
             border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             display: flex; flex-direction: column; 
-            height: 95vh; /* Fit within viewport */
-            position: relative;
+            height: 96vh; position: relative;
         }
 
         /* Top Bar */
@@ -59,10 +58,29 @@
         .header {
             background: var(--primary); color: white;
             padding: 15px 20px; text-align: center; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .match-title { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; font-weight: 600; }
-        .main-score { font-size: 4rem; font-weight: 800; margin: 0; line-height: 1; }
+        
+        .teams-display { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .main-score { font-size: 4rem; font-weight: 800; margin: 0; line-height: 0.9; }
+        
+        .chase-info {
+            background: rgba(0,0,0,0.25);
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.9rem; margin-top: 10px; font-weight: 500;
+            display: inline-block;
+        }
+        .rrr-tag { font-size: 0.75rem; margin-left: 5px; opacity: 0.8; }
+
         .over-status { font-size: 1.1rem; margin-top: 5px; opacity: 0.9; }
+
+        /* Match Result Banner (Overlay) */
+        .result-banner {
+            background: var(--run); color: white;
+            padding: 10px; text-align: center; font-weight: bold;
+            display: none; animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 
         /* Strip */
         .current-over-strip {
@@ -96,42 +114,21 @@
             font-size: 1.3rem; font-weight: bold; cursor: pointer;
             background: var(--btn-bg); color: var(--text);
             transition: all 0.1s; -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
         button.key:active { transform: scale(0.95); opacity: 0.8; }
         
-        /* FIXED ACTIVE STATES:
-           Instead of filling the button, we use a thick border and colored text.
-           This ensures readability is never lost.
-        */
-        button.active-nb { 
-            border: 3px solid var(--extra) !important;
-            color: var(--extra) !important;
-            background: var(--card) !important; /* Keep background clean */
-            transform: scale(0.96);
-        }
+        button.active-nb { border: 3px solid var(--extra) !important; color: var(--extra) !important; background: var(--card) !important; transform: scale(0.96); }
+        button.active-ro { border: 3px solid var(--wicket) !important; color: var(--wicket) !important; background: var(--card) !important; transform: scale(0.96); }
+        button.active-lb { border: 3px solid #64748b !important; color: #64748b !important; background: var(--card) !important; transform: scale(0.96); }
         
-        button.active-ro { 
-            border: 3px solid var(--wicket) !important;
-            color: var(--wicket) !important;
-            background: var(--card) !important;
-            transform: scale(0.96);
-        }
-        
-        button.active-lb { 
-            border: 3px solid #64748b !important;
-            color: #64748b !important;
-            background: var(--card) !important;
-            transform: scale(0.96);
-        }
+        .keypad.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
 
-        /* Specific Button Colors */
         .btn-w { background: var(--wicket) !important; color: white !important; }
         .btn-ex { font-size: 1rem; }
         .btn-undo { background: #475569 !important; color: white !important; font-size: 1.2rem; }
-        
         .mod-btn { font-size: 1rem; }
         .mod-btn.ro { color: var(--wicket); border: 2px solid var(--wicket) !important; background: transparent !important; }
-        /* Dark mode adjustment for RO button visibility */
         [data-theme="dark"] .mod-btn.ro { background: rgba(239, 68, 68, 0.1) !important; }
 
         /* History */
@@ -139,56 +136,36 @@
             padding: 10px 20px; border-top: 1px solid var(--border-color); 
             flex-grow: 1; overflow-y: auto; background: var(--bg);
         }
-        .history-row { 
-            display: flex; justify-content: space-between; padding: 12px 0; 
-            border-bottom: 1px solid var(--border-color); font-size: 0.95rem; 
-        }
+        .history-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
 
-        /* MODALS */
+        /* Modals */
         .modal-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.8); z-index: 100;
             display: none; align-items: center; justify-content: center;
         }
         .modal-overlay.open { display: flex; }
-        
         .modal-content {
-            background: var(--card); width: 85%; max-height: 80%;
+            background: var(--card); width: 85%; max-height: 85%;
             border-radius: 15px; padding: 20px; overflow-y: auto;
             color: var(--text); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
-        
-        .modal-header { 
-            font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
-        .list-item {
-            padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; 
-            margin-bottom: 10px; cursor: pointer; display: flex; 
-            justify-content: space-between; align-items: center;
-            background: var(--btn-bg);
-        }
-        .list-item.active { border: 2px solid var(--primary); background: rgba(37, 99, 235, 0.1); }
-
+        .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .btn-full {
             width: 100%; padding: 15px; background: var(--primary); color: white;
             border: none; border-radius: 12px; font-weight: bold; font-size: 1rem;
             margin-top: 10px; cursor: pointer;
         }
-        
         .input-field {
-            width: 100%; padding: 12px; border-radius: 8px; 
-            border: 1px solid #ccc; font-size: 1rem; margin-bottom: 15px;
-            box-sizing: border-box; background: var(--bg); color: var(--text);
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; 
+            font-size: 1rem; margin-bottom: 15px; box-sizing: border-box; background: var(--bg); color: var(--text);
         }
-
+        
+        .list-item { padding: 15px; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--btn-bg); }
+        .list-item.active { border: 2px solid var(--primary); background: rgba(37, 99, 235, 0.1); }
+        
         .toggle-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        .toggle-btn {
-            flex: 1; padding: 10px; border: 1px solid var(--border-color);
-            background: var(--btn-bg); color: var(--text);
-            border-radius: 8px; font-weight: bold; cursor: pointer;
-        }
+        .toggle-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); background: var(--btn-bg); color: var(--text); border-radius: 8px; font-weight: bold; cursor: pointer; }
         .toggle-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
 </head>
@@ -198,20 +175,23 @@
     <div class="top-bar">
         <button class="btn-nav" onclick="openMatchMenu()">☰ Matches</button>
         <div class="nav-group">
-            <button class="btn-nav" onclick="toggleInnings()" id="inningsBtn">Inn 1</button>
+            <button class="btn-nav" onclick="trySwitchInnings()" id="inningsBtn">Inn 1</button>
             <button class="btn-nav" onclick="openSettings()">⚙️</button>
         </div>
     </div>
 
     <div class="header">
-        <div class="match-title" id="matchTitle">Loading...</div>
+        <div class="teams-display" id="teamNamesDisplay">Team A vs Team B</div>
         <div class="main-score"><span id="runs">0</span>/<span id="wickets">0</span></div>
+        <div id="chaseInfo" class="chase-info" style="display:none"></div>
         <div class="over-status">Overs: <span id="overs">0.0</span></div>
     </div>
 
+    <div id="resultBanner" class="result-banner"></div>
+
     <div class="current-over-strip" id="currentOverDisplay"></div>
 
-    <div class="keypad">
+    <div class="keypad" id="keypad">
         <button class="key" onclick="press(0)">0</button>
         <button class="key" onclick="press(1)">1</button>
         <button class="key" onclick="press(2)">2</button>
@@ -234,164 +214,174 @@
 
     <div class="modal-overlay" id="matchModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>My Matches</span>
-                <span onclick="closeModal('matchModal')" style="cursor:pointer">✕</span>
-            </div>
+            <div class="modal-header"><span>Matches</span><span onclick="closeModal('matchModal')" style="cursor:pointer">✕</span></div>
             <div id="matchListContainer"></div>
-            <button class="btn-full" onclick="createNewMatch()">+ Create New Match</button>
+            <button class="btn-full" onclick="createNewMatch()">+ New Match</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>Settings</span>
-                <span onclick="closeModal('settingsModal')" style="cursor:pointer">✕</span>
+            <div class="modal-header"><span>Match Setup</span><span onclick="closeModal('settingsModal')" style="cursor:pointer">✕</span></div>
+            
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; font-weight:bold;">Team 1 (Bat)</label>
+                    <input type="text" id="team1Input" class="input-field" placeholder="Team A">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; font-weight:bold;">Team 2 (Bowl)</label>
+                    <input type="text" id="team2Input" class="input-field" placeholder="Team B">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; font-weight:bold;">Overs</label>
+                    <input type="number" id="oversInput" class="input-field" placeholder="20">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:0.8rem; font-weight:bold;">Wickets</label>
+                    <input type="number" id="wicketsInput" class="input-field" placeholder="10">
+                </div>
             </div>
             
-            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:5px;">Rename Current Match</label>
-            <input type="text" id="renameInput" class="input-field" placeholder="Match Name">
-            <button class="btn-full" onclick="saveName()" style="margin-top:0; margin-bottom:20px;">Save Name</button>
-            
+            <button class="btn-full" onclick="saveSettings()" style="margin-top:0; margin-bottom:20px;">Save Changes</button>
             <hr style="opacity:0.2; margin: 20px 0;">
-
-            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:8px;">Extras Value (WD/NB)</label>
+            
+            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:8px;">Extras (WD/NB)</label>
             <div class="toggle-container">
                 <button class="toggle-btn" id="extra0" onclick="setExtrasValue(0)">0 Run</button>
                 <button class="toggle-btn" id="extra1" onclick="setExtrasValue(1)">1 Run</button>
             </div>
 
-            <button class="list-item" style="width:100%" onclick="toggleTheme()"><span>🌙 Toggle Dark Mode</span></button>
-            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="deleteMatch()"><span>🗑️ Delete This Match</span></button>
-            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="factoryReset()"><span>⚠️ Reset Everything</span></button>
+            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:8px;">Vibration</label>
+            <div class="toggle-container">
+                <button class="toggle-btn" id="vibOn" onclick="setHaptics(true)">On</button>
+                <button class="toggle-btn" id="vibOff" onclick="setHaptics(false)">Off</button>
+            </div>
+
+            <button class="list-item" style="width:100%" onclick="toggleTheme()"><span>🌙 Toggle Theme</span></button>
+            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="deleteMatch()"><span>🗑️ Delete Match</span></button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- State Management ---
-    let db = { matches: [], activeId: null, theme: 'light', settings: { extraRunVal: 1 } };
-    let modifier = null; // Stores 'NB', 'RO', 'LB' or null
+    // --- Data Model V10 ---
+    // Added haptics to DEFAULTS
+    const DEFAULTS = { 
+        team1: 'Team A', team2: 'Team B', overs: 20, wickets: 10, extraVal: 1, haptics: true
+    };
+    
+    let db = { matches: [], activeId: null, theme: 'light', settings: { ...DEFAULTS } };
+    let modifier = null;
 
-    // --- Initialization ---
+    // --- Init ---
     (function init() {
-        const saved = localStorage.getItem('cricket_pro_v6');
+        const saved = localStorage.getItem('cricket_pro_v10');
         if (saved) {
             db = JSON.parse(saved);
-            if (!db.settings) db.settings = { extraRunVal: 1 };
-            if (!db.matches || db.matches.length === 0) createNewMatch(true);
-        } else {
-            createNewMatch(true);
-        }
+            // Ensure settings exist and merge with defaults
+            if(!db.settings) db.settings = { ...DEFAULTS };
+            else {
+                // Migration for old data
+                if(db.settings.haptics === undefined) db.settings.haptics = true;
+            }
+
+            if(!db.matches || db.matches.length === 0) createNewMatch(true);
+        } else { createNewMatch(true); }
         applyTheme();
         render();
     })();
 
-    function saveDB() {
-        localStorage.setItem('cricket_pro_v6', JSON.stringify(db));
-    }
-
     // --- Helpers ---
-    function getActiveMatch() {
-        if(!db.matches) return null;
-        return db.matches.find(m => m.id === db.activeId);
-    }
-
-    function getCurrentBallStack() {
-        const match = getActiveMatch();
-        if (!match) return [];
-        return match.activeInn === 1 ? match.inn1 : match.inn2;
-    }
-
-    // --- Modifier Logic (The Buttons) ---
-    function setModifier(type) {
-        if (modifier === type) {
-            modifier = null; // Toggle off if clicked again
-        } else {
-            modifier = type; // Set new modifier
+    function saveDB() { localStorage.setItem('cricket_pro_v10', JSON.stringify(db)); }
+    function getActiveMatch() { return db.matches ? db.matches.find(m => m.id === db.activeId) : null; }
+    function getCurrentStack() { const m = getActiveMatch(); return m ? (m.activeInn === 1 ? m.inn1 : m.inn2) : []; }
+    
+    // Updated Vibrate Function
+    function vibrate(pattern = 50) { 
+        if(db.settings.haptics && "vibrate" in navigator) {
+            navigator.vibrate(pattern); 
         }
+    }
+
+    // --- Keypad Logic ---
+    function setModifier(type) {
+        modifier = (modifier === type) ? null : type;
         updateKeypadVisuals();
     }
 
     function updateKeypadVisuals() {
-        // Reset classes to base state
         document.getElementById('btn-nb').className = 'key btn-ex';
         document.getElementById('btn-ro').className = 'key mod-btn ro';
         document.getElementById('btn-lb').className = 'key mod-btn';
-        
-        // Add Active Class if needed
         if (modifier === 'NB') document.getElementById('btn-nb').classList.add('active-nb');
         if (modifier === 'RO') document.getElementById('btn-ro').classList.add('active-ro');
         if (modifier === 'LB') document.getElementById('btn-lb').classList.add('active-lb');
     }
 
-    // --- Core Scoring Logic ---
+    // --- Core Press Logic ---
     function press(val) {
-        let entry = val;
+        if(document.getElementById('keypad').classList.contains('disabled')) return;
+
+        if (val === 'WD') { modifier = null; updateKeypadVisuals(); }
+        if (modifier === 'LB' && typeof val !== 'number') { modifier = null; updateKeypadVisuals(); }
         
-        // Apply Modifier if active
+        let entry = val;
         if (modifier) {
             entry = { type: modifier, val: val };
-            modifier = null; // Reset after one use for speed
-            updateKeypadVisuals();
+            modifier = null; updateKeypadVisuals();
         }
 
         const match = getActiveMatch();
         const stack = match.activeInn === 1 ? match.inn1 : match.inn2;
         stack.push(entry);
-        saveDB();
+        saveDB(); 
+        
+        if(val === 4 || val === 6 || val === 'W' || (entry.type && (entry.type==='RO' || entry.val==='W'))) {
+            vibrate(100);
+        } else {
+            vibrate(30);
+        }
+
         render();
     }
 
     function undo() {
-        const stack = getCurrentBallStack();
+        const stack = getCurrentStack();
         if (stack.length > 0) {
-            stack.pop();
-            modifier = null; // Reset modifier on undo
-            updateKeypadVisuals();
-            saveDB();
-            render();
+            stack.pop(); modifier = null; updateKeypadVisuals(); saveDB(); render();
         }
     }
 
-    // --- Calculation & Rendering ---
+    // --- Scoring & Match Logic ---
     function calcScore(stack) {
         let r = 0, w = 0, legal = 0;
         let cur = [], history = [];
-        const exVal = (db.settings && db.settings.extraRunVal !== undefined) ? db.settings.extraRunVal : 1;
+        const exVal = (db.settings.extraVal !== undefined) ? db.settings.extraVal : 1;
 
         stack.forEach(e => {
             let isL = false, d = e;
-
             if (typeof e === 'object' && e !== null) {
-                // NB Logic
                 if (e.type === 'NB') {
-                    r += exVal; // Extra
+                    r += exVal; 
                     if (typeof e.val === 'number') { r += e.val; d = e.val + "nb"; }
-                    else if (e.val === 'W') { w++; d = "NB+W"; }
-                    else { d = "NB"; }
-                    isL = false; 
-                }
-                // RO Logic
-                else if (e.type === 'RO') {
+                    else if (e.val === 'W') { w++; d = "NB+W"; } else { d = "NB"; }
+                    isL = false;
+                } else if (e.type === 'RO') {
                     w++; isL = true; 
-                    if (typeof e.val === 'number') {
-                        r += e.val;
-                        d = e.val > 0 ? `${e.val}+W` : "W";
-                    } else { d = "W"; }
-                }
-                // LB Logic
-                else if (e.type === 'LB') {
+                    if (typeof e.val === 'number') { r += e.val; d = e.val > 0 ? `${e.val}+W` : "W"; } else { d = "W"; }
+                } else if (e.type === 'LB') {
                     isL = true;
-                    if (typeof e.val === 'number') { r += e.val; d = e.val + "lb"; }
+                    if (typeof e.val === 'number') { r += e.val; d = e.val + "lb"; } else { d = "0"; }
                 }
             } else {
                 if (typeof e === 'number') { r += e; isL = true; }
                 else if (e === 'W') { w++; isL = true; }
                 else if (e === 'WD') { r += exVal; isL = false; }
             }
-
             cur.push(d);
             if (isL) legal++;
             if (legal > 0 && legal % 6 === 0 && isL) {
@@ -399,35 +389,93 @@
                 cur = [];
             }
         });
-        return { runs: r, wickets: w, overs: `${Math.floor(legal/6)}.${legal%6}`, cur, history };
+        return { runs: r, wickets: w, overs: `${Math.floor(legal/6)}.${legal%6}`, legalBalls: legal, cur, history };
     }
 
     function render() {
         const match = getActiveMatch();
         if(!match) return;
+        
+        const inn1Stats = calcScore(match.inn1);
+        const inn2Stats = calcScore(match.inn2);
+        const activeStats = match.activeInn === 1 ? inn1Stats : inn2Stats;
 
-        const innBtn = document.getElementById('inningsBtn');
-        innBtn.innerText = `Inn ${match.activeInn}`;
+        document.getElementById('inningsBtn').innerText = `Inn ${match.activeInn}`;
+        document.getElementById('teamNamesDisplay').innerText = `${match.team1 || 'Team A'} vs ${match.team2 || 'Team B'}`;
+        document.getElementById('runs').innerText = activeStats.runs;
+        document.getElementById('wickets').innerText = activeStats.wickets;
+        document.getElementById('overs').innerText = activeStats.overs;
+
+        const chaseDiv = document.getElementById('chaseInfo');
+        const banner = document.getElementById('resultBanner');
+        const keypad = document.getElementById('keypad');
         
-        const stats = calcScore(getCurrentBallStack());
-        
-        document.getElementById('matchTitle').innerText = match.name;
-        document.getElementById('runs').innerText = stats.runs;
-        document.getElementById('wickets').innerText = stats.wickets;
-        document.getElementById('overs').innerText = stats.overs;
+        const maxOvers = match.overs || 20;
+        const maxWickets = match.wickets || 10;
+        const totalBalls = maxOvers * 6;
+
+        let isMatchOver = false;
+        let resultText = "";
+
+        if (match.activeInn === 2) {
+            const target = inn1Stats.runs + 1;
+            const runsNeeded = target - inn2Stats.runs;
+            const ballsBowled = inn2Stats.legalBalls;
+            const ballsLeft = totalBalls - ballsBowled;
+            const wicketsLeft = maxWickets - inn2Stats.wickets;
+
+            let rrr = 0;
+            if(ballsLeft > 0) rrr = (runsNeeded / (ballsLeft/6)).toFixed(2);
+            if(runsNeeded <= 0) rrr = 0;
+
+            if (runsNeeded <= 0) {
+                isMatchOver = true;
+                resultText = `${match.team2 || 'Chasing Team'} won by ${wicketsLeft} wickets! 🏆`;
+                chaseDiv.innerHTML = `Target Reached!`;
+                chaseDiv.style.background = "var(--run)"; chaseDiv.style.color = "#fff";
+            } else if (ballsLeft <= 0 || wicketsLeft <= 0) {
+                isMatchOver = true;
+                if(runsNeeded === 1) resultText = "Match Tied! 🤝";
+                else resultText = `${match.team1 || 'Defending Team'} won by ${runsNeeded - 1} runs! 🏆`;
+                chaseDiv.innerHTML = `Innings Ends.`;
+                chaseDiv.style.background = "var(--wicket)"; chaseDiv.style.color = "#fff";
+            } else {
+                chaseDiv.innerHTML = `Need <strong>${runsNeeded}</strong> off <strong>${ballsLeft}</strong> <span class="rrr-tag">(RRR: ${rrr})</span>`;
+                chaseDiv.style.background = "rgba(0,0,0,0.1)"; 
+                if(db.theme==='dark') chaseDiv.style.background = "rgba(255,255,255,0.15)";
+                chaseDiv.style.color = "var(--text)";
+            }
+            chaseDiv.style.display = 'inline-block';
+        } else {
+            const ballsBowled = inn1Stats.legalBalls;
+            const wicketsLeft = maxWickets - inn1Stats.wickets;
+            if (ballsBowled >= totalBalls || wicketsLeft <= 0) {
+                chaseDiv.innerHTML = "Innings Complete. Switch to Inn 2.";
+                chaseDiv.style.background = "var(--primary)"; chaseDiv.style.color = "#fff";
+                chaseDiv.style.display = 'inline-block';
+            } else {
+                chaseDiv.style.display = 'none';
+            }
+        }
+
+        if (isMatchOver) {
+            banner.innerText = resultText;
+            banner.style.display = 'block';
+            keypad.classList.add('disabled');
+        } else {
+            banner.style.display = 'none';
+            keypad.classList.remove('disabled');
+        }
 
         const strip = document.getElementById('currentOverDisplay');
         strip.innerHTML = '';
-        stats.cur.forEach(b => {
+        activeStats.cur.forEach(b => {
             const div = document.createElement('div');
-            let type = '';
-            let txt = b.toString();
-            
+            let type = '', txt = b.toString();
             if (txt.includes('nb')) type = 'nb';
             else if (txt.includes('lb')) type = 'lb';
-            else if (txt.includes('W')) type = 'w'; 
+            else if (txt.includes('W')) type = 'w';
             else if (b === 4 || b === 6) type = 'boundary';
-            
             div.className = `ball-circle ${type}`;
             div.innerText = b;
             strip.appendChild(div);
@@ -435,7 +483,7 @@
 
         const histDiv = document.getElementById('historyList');
         histDiv.innerHTML = '';
-        stats.history.forEach(o => {
+        activeStats.history.forEach(o => {
             const row = document.createElement('div');
             row.className = 'history-row';
             row.innerHTML = `<strong>Over ${o.n}</strong> <span>${o.b.join(' · ')}</span>`;
@@ -443,91 +491,104 @@
         });
     }
 
-    // --- UI/Modal Functions ---
+    // --- UX Functions ---
+    function trySwitchInnings() {
+        const match = getActiveMatch();
+        if (match.activeInn === 1) {
+            if(confirm("Start 2nd Innings? This will set the target.")) {
+                match.activeInn = 2; saveDB(); render();
+            }
+        } else {
+            if(match.inn2.length > 0) {
+                if(confirm("⚠️ Warning: Scoring has started. Go back to Inn 1 anyway?")) {
+                    match.activeInn = 1; saveDB(); render();
+                }
+            } else {
+                match.activeInn = 1; saveDB(); render();
+            }
+        }
+    }
+
     function openSettings() {
         const match = getActiveMatch();
-        if(match) document.getElementById('renameInput').value = match.name;
+        if(match) {
+            document.getElementById('team1Input').value = match.team1 || 'Team A';
+            document.getElementById('team2Input').value = match.team2 || 'Team B';
+            document.getElementById('oversInput').value = match.overs || 20;
+            document.getElementById('wicketsInput').value = match.wickets || 10;
+        }
         
-        const val = db.settings.extraRunVal;
+        // Extras Toggle UI
+        const val = db.settings.extraVal;
         document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
         document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
+        
+        // Vibration Toggle UI
+        const vib = db.settings.haptics;
+        document.getElementById('vibOn').className = `toggle-btn ${vib ? 'selected' : ''}`;
+        document.getElementById('vibOff').className = `toggle-btn ${!vib ? 'selected' : ''}`;
 
         document.getElementById('settingsModal').classList.add('open');
     }
-
-    function setExtrasValue(val) {
-        db.settings.extraRunVal = val;
-        saveDB();
-        document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
-        document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
-        render();
+    
+    function setExtrasValue(val) { db.settings.extraVal = val; }
+    
+    function setHaptics(bool) {
+        db.settings.haptics = bool;
+        // Update UI immediately
+        document.getElementById('vibOn').className = `toggle-btn ${bool ? 'selected' : ''}`;
+        document.getElementById('vibOff').className = `toggle-btn ${!bool ? 'selected' : ''}`;
     }
-
-    function saveName() {
-        const match = getActiveMatch();
-        const newName = document.getElementById('renameInput').value;
-        if(match && newName) {
-            match.name = newName;
-            saveDB();
-            render();
-            closeModal('settingsModal');
+    
+    function saveSettings() {
+        const m = getActiveMatch();
+        if(m) {
+            m.team1 = document.getElementById('team1Input').value;
+            m.team2 = document.getElementById('team2Input').value;
+            const ov = parseInt(document.getElementById('oversInput').value);
+            if(ov > 0) m.overs = ov;
+            const wkt = parseInt(document.getElementById('wicketsInput').value);
+            if(wkt > 0) m.wickets = wkt;
         }
+        // Save global settings (haptics/extras)
+        db.settings.extraVal = db.settings.extraVal; 
+        db.settings.haptics = db.settings.haptics;
+        saveDB(); render(); closeModal('settingsModal');
     }
 
-    function toggleTheme() {
-        db.theme = db.theme === 'light' ? 'dark' : 'light';
-        saveDB();
-        applyTheme();
-    }
+    function toggleTheme() { db.theme = db.theme === 'light' ? 'dark' : 'light'; saveDB(); applyTheme(); }
     function applyTheme() { document.documentElement.setAttribute('data-theme', db.theme || 'light'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-    function createNewMatch(isInit = false) {
-        const newId = Date.now();
-        const matchNum = db.matches ? db.matches.length + 1 : 1;
-        const newMatch = {
-            id: newId, name: `Match ${matchNum}`, date: new Date().toLocaleDateString(),
-            inn1: [], inn2: [], activeInn: 1
+    
+    function createNewMatch(i=false) {
+        const id = Date.now(), num = db.matches ? db.matches.length+1 : 1;
+        const m = { 
+            id, name:`Match ${num}`, date: new Date().toLocaleDateString(), 
+            inn1:[], inn2:[], activeInn:1, 
+            team1: 'Team A', team2: 'Team B', overs: 20, wickets: 10 
         };
-        if(!db.matches) db.matches = [];
-        db.matches.push(newMatch);
-        db.activeId = newId;
-        saveDB();
-        if(!isInit) { closeModal('matchModal'); render(); }
+        if(!db.matches) db.matches=[]; db.matches.push(m); db.activeId=id; saveDB(); if(!i) { closeModal('matchModal'); render(); }
     }
     function switchMatch(id) { db.activeId = id; saveDB(); closeModal('matchModal'); render(); }
-    function deleteMatch() {
-        if(confirm("Delete this match?")) {
-            db.matches = db.matches.filter(m => m.id !== db.activeId);
-            if(db.matches.length === 0) createNewMatch(true);
-            else db.activeId = db.matches[0].id;
-            saveDB();
-            closeModal('settingsModal');
-            render();
-        }
+    
+    function deleteMatch() { 
+        if(confirm("Delete this match?")) { 
+            db.matches=db.matches.filter(m=>m.id!==db.activeId); 
+            if(!db.matches.length) createNewMatch(true); 
+            else db.activeId=db.matches[0].id; 
+            saveDB(); closeModal('settingsModal'); render(); 
+        } 
     }
-    function toggleInnings() {
-        const match = getActiveMatch();
-        match.activeInn = match.activeInn === 1 ? 2 : 1;
-        saveDB();
-        render();
-    }
+    
     function openMatchMenu() {
-        const container = document.getElementById('matchListContainer');
-        container.innerHTML = '';
+        const c = document.getElementById('matchListContainer'); c.innerHTML='';
         db.matches.slice().reverse().forEach(m => {
-            const div = document.createElement('div');
-            const isActive = m.id === db.activeId;
-            const s1 = calcScore(m.inn1);
-            const s2 = calcScore(m.inn2);
-            div.className = `list-item ${isActive ? 'active' : ''}`;
-            div.innerHTML = `<div><strong>${m.name}</strong><div style="font-size:0.75rem;opacity:0.7;">Inn1:${s1.runs}/${s1.wickets} • Inn2:${s2.runs}/${s2.wickets}</div></div>`;
-            div.onclick = () => switchMatch(m.id);
-            container.appendChild(div);
-        });
-        document.getElementById('matchModal').classList.add('open');
+            const d = document.createElement('div'), s1=calcScore(m.inn1), s2=calcScore(m.inn2);
+            d.className=`list-item ${m.id===db.activeId?'active':''}`;
+            d.innerHTML=`<div><strong>${m.team1} vs ${m.team2}</strong><div style="font-size:0.75rem;opacity:0.7;">${m.date} • ${s1.runs}/${s1.wickets} vs ${s2.runs}/${s2.wickets}</div></div>`;
+            d.onclick=()=>switchMatch(m.id); c.appendChild(d);
+        }); document.getElementById('matchModal').classList.add('open');
     }
-    function factoryReset() { if(confirm("Clear All Data?")) { localStorage.removeItem('cricket_pro_v6'); location.reload(); } }
 </script>
 </body>
 </html>
