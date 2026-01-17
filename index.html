@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cricket Scorer Pro V4</title>
+    <title>Cricket Scorer Pro V5</title>
     <style>
         :root {
             --primary: #2563eb; 
@@ -14,7 +14,7 @@
             --wicket: #ef4444; 
             --run: #10b981; 
             --extra: #f59e0b;
-            --btn-bg: #f1f5f9;
+            --btn-bg: #e2e8f0;
         }
 
         [data-theme="dark"] {
@@ -43,9 +43,7 @@
             background: var(--primary-dark); color: white;
             padding: 12px 15px; display: flex; justify-content: space-between; align-items: center;
         }
-        
-        .nav-group { display: flex; gap: 10px; }
-
+        .nav-group { display: flex; gap: 8px; }
         .btn-nav {
             background: rgba(255,255,255,0.2); border: none; color: white;
             padding: 6px 12px; border-radius: 12px; font-size: 0.85rem; 
@@ -55,58 +53,67 @@
         /* Scoreboard */
         .header {
             background: var(--primary); color: white;
-            padding: 20px; text-align: center; flex-shrink: 0;
+            padding: 15px 20px; text-align: center; flex-shrink: 0;
         }
-
         .match-title { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; font-weight: 600; }
-        .main-score { font-size: 3.8rem; font-weight: 800; margin: 5px 0; line-height: 1; }
-        .over-status { font-size: 1.2rem; margin-top: 5px; opacity: 0.9; }
+        .main-score { font-size: 4rem; font-weight: 800; margin: 0; line-height: 1; }
+        .over-status { font-size: 1.1rem; margin-top: 5px; opacity: 0.9; }
 
         /* Strip */
         .current-over-strip {
-            background: var(--btn-bg); padding: 12px; display: flex;
+            background: var(--btn-bg); padding: 10px; display: flex;
             align-items: center; gap: 8px; overflow-x: auto;
-            border-bottom: 1px solid rgba(0,0,0,0.1); min-height: 55px;
+            border-bottom: 1px solid rgba(0,0,0,0.1); min-height: 50px;
             flex-shrink: 0; scrollbar-width: none; 
         }
         .current-over-strip::-webkit-scrollbar { display: none; }
 
         .ball-circle {
-            width: 34px; height: 34px; border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; font-size: 0.8rem; background: var(--card); color: var(--text);
-            border: 2px solid #cbd5e1; flex-shrink: 0;
+            border: 2px solid #94a3b8; flex-shrink: 0;
         }
-
         .ball-circle.w { background: var(--wicket); color: white; border-color: var(--wicket); }
         .ball-circle.ro { border: 2px solid var(--wicket); color: var(--wicket); }
         .ball-circle.boundary { background: var(--run); color: white; border-color: var(--run); }
         .ball-circle.nb { background: var(--extra); color: white; border-color: var(--extra); }
+        .ball-circle.lb { background: #64748b; color: white; border-color: #64748b; }
 
         /* Keypad */
         .keypad {
             display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 8px; padding: 10px; flex-shrink: 0;
+            gap: 10px; padding: 15px; flex-shrink: 0;
         }
 
         button.key {
-            border: none; border-radius: 12px; padding: 15px 0;
-            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 12px; padding: 16px 0;
+            font-size: 1.25rem; font-weight: bold; cursor: pointer;
             background: var(--btn-bg); color: var(--text);
-            transition: transform 0.1s; -webkit-tap-highlight-color: transparent;
+            transition: all 0.1s; -webkit-tap-highlight-color: transparent;
         }
         button.key:active { transform: scale(0.95); opacity: 0.8; }
         
-        button.active-mode { 
-            background: var(--text) !important; color: var(--card) !important; 
-            box-shadow: 0 0 0 3px var(--extra); 
+        /* Modifiers Active States */
+        button.active-nb { 
+            background: var(--extra) !important; color: white !important; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2); transform: scale(0.98);
+        }
+        button.active-ro { 
+            background: var(--wicket) !important; color: white !important; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2); transform: scale(0.98);
+        }
+        button.active-lb { 
+            background: #64748b !important; color: white !important; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2); transform: scale(0.98);
         }
 
         .btn-w { background: var(--wicket) !important; color: white !important; }
-        .btn-ro { border: 2px solid var(--wicket) !important; color: var(--wicket) !important; font-size: 0.8rem; background: var(--card) !important; }
-        .btn-ex { background: var(--extra) !important; color: white !important; font-size: 0.9rem; }
-        .btn-undo { grid-column: span 2; background: #64748b !important; color: white !important; }
-        .btn-del { grid-column: span 2; background: #0f172a !important; color: white !important; }
+        .btn-ex { background: var(--extra) !important; color: white !important; font-size: 1rem; }
+        .btn-undo { background: #475569 !important; color: white !important; font-size: 1rem; }
+        
+        .mod-btn { font-size: 1rem; border: 2px solid transparent; }
+        .mod-btn.ro { color: var(--wicket); border-color: var(--wicket); background: var(--card) !important; }
 
         /* History */
         .history-section {
@@ -157,18 +164,13 @@
             box-sizing: border-box; background: var(--bg); color: var(--text);
         }
 
-        /* Custom Toggle for Settings */
-        .toggle-container {
-            display: flex; gap: 10px; margin-bottom: 20px;
-        }
+        .toggle-container { display: flex; gap: 10px; margin-bottom: 20px; }
         .toggle-btn {
             flex: 1; padding: 10px; border: 1px solid rgba(0,0,0,0.1);
             background: var(--btn-bg); color: var(--text);
             border-radius: 8px; font-weight: bold; cursor: pointer;
         }
-        .toggle-btn.selected {
-            background: var(--primary); color: white; border-color: var(--primary);
-        }
+        .toggle-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -195,16 +197,16 @@
         <button class="key" onclick="press(1)">1</button>
         <button class="key" onclick="press(2)">2</button>
         <button class="key" onclick="press(3)">3</button>
+        
         <button class="key" onclick="press(4)" style="color:var(--run)">4</button>
         <button class="key" onclick="press(6)" style="color:var(--primary)">6</button>
-        <button class="key btn-w" onclick="press('W')">W</button>
-        <button class="key btn-ro" onclick="press('RO')">+W(RO)</button>
         <button class="key btn-ex" onclick="press('WD')">WD</button>
-        <button class="key btn-ex" id="btn-nb" onclick="toggleNB()">NB</button>
-        <button class="key btn-ex" onclick="press('LB')">LB</button>
-        <button class="key" onclick="press(0)">.</button>
-        <button class="key btn-undo" onclick="undo()">UNDO</button>
-        <button class="key btn-del" onclick="deleteMatch()">DEL MATCH</button>
+        <button class="key btn-ex" id="btn-nb" onclick="setModifier('NB')">NB</button>
+        
+        <button class="key mod-btn" style="color:#64748b; border-color:#64748b; background:var(--card)!important" id="btn-lb" onclick="setModifier('LB')">LB</button>
+        <button class="key mod-btn ro" id="btn-ro" onclick="setModifier('RO')">RO</button>
+        <button class="key btn-w" onclick="press('W')">W</button>
+        <button class="key btn-undo" onclick="undo()">⌫</button>
     </div>
 
     <div class="history-section">
@@ -230,40 +232,34 @@
             </div>
             
             <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:5px;">Rename Current Match</label>
-            <input type="text" id="renameInput" class="input-field" placeholder="e.g. India vs Pak">
+            <input type="text" id="renameInput" class="input-field" placeholder="Match Name">
             <button class="btn-full" onclick="saveName()" style="margin-top:0; margin-bottom:20px;">Save Name</button>
             
             <hr style="opacity:0.2; margin: 20px 0;">
 
-            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:8px;">Runs for Wide/No-Ball</label>
+            <label style="font-size:0.9rem; font-weight:bold; display:block; margin-bottom:8px;">Extras Value (WD/NB)</label>
             <div class="toggle-container">
-                <button class="toggle-btn" id="extra0" onclick="setExtrasValue(0)">0 Run</button>
-                <button class="toggle-btn" id="extra1" onclick="setExtrasValue(1)">1 Run</button>
+                <button class="toggle-btn" id="extra0" onclick="setExtrasValue(0)">0</button>
+                <button class="toggle-btn" id="extra1" onclick="setExtrasValue(1)">1</button>
             </div>
 
-            <button class="list-item" style="width:100%" onclick="toggleTheme()">
-                <span>🌙 Toggle Dark Mode</span>
-            </button>
-
-            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="factoryReset()">
-                <span>⚠️ Factory Reset (Clear All)</span>
-            </button>
+            <button class="list-item" style="width:100%" onclick="toggleTheme()"><span>🌙 Toggle Theme</span></button>
+            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="deleteMatch()"><span>🗑️ Delete Match</span></button>
+            <button class="list-item" style="width:100%; color:var(--wicket); border-color:var(--wicket)" onclick="factoryReset()"><span>⚠️ Factory Reset</span></button>
         </div>
     </div>
 </div>
 
 <script>
     // --- State ---
-    // Added 'settings' object to db structure
     let db = { matches: [], activeId: null, theme: 'light', settings: { extraRunVal: 1 } };
-    let isNbActive = false; 
+    let modifier = null; // 'NB', 'RO', 'LB', or null
 
     // --- Init ---
     (function init() {
-        const saved = localStorage.getItem('cricket_pro_v4');
+        const saved = localStorage.getItem('cricket_pro_v5');
         if (saved) {
             db = JSON.parse(saved);
-            // Migration check: if settings doesn't exist in old data
             if (!db.settings) db.settings = { extraRunVal: 1 };
             if (!db.matches || db.matches.length === 0) createNewMatch(true);
         } else {
@@ -274,10 +270,10 @@
     })();
 
     function saveDB() {
-        localStorage.setItem('cricket_pro_v4', JSON.stringify(db));
+        localStorage.setItem('cricket_pro_v5', JSON.stringify(db));
     }
 
-    // --- Core Data Helpers ---
+    // --- Helpers ---
     function getActiveMatch() {
         if(!db.matches) return null;
         return db.matches.find(m => m.id === db.activeId);
@@ -289,197 +285,111 @@
         return match.activeInn === 1 ? match.inn1 : match.inn2;
     }
 
-    // --- Settings & Theme ---
-    function openSettings() {
-        const match = getActiveMatch();
-        if(match) document.getElementById('renameInput').value = match.name;
+    // --- Modifier Logic (NB, RO, LB) ---
+    function setModifier(type) {
+        // Toggle: if clicking same, turn off. If clicking different, switch to new.
+        if (modifier === type) {
+            modifier = null;
+        } else {
+            modifier = type;
+        }
+        updateKeypadVisuals();
+    }
+
+    function updateKeypadVisuals() {
+        // Reset all
+        document.getElementById('btn-nb').className = 'key btn-ex';
+        document.getElementById('btn-ro').className = 'key mod-btn ro';
+        document.getElementById('btn-lb').className = 'key mod-btn';
         
-        // Update UI for Extra Buttons
-        const val = db.settings.extraRunVal;
-        document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
-        document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
-
-        document.getElementById('settingsModal').classList.add('open');
-    }
-
-    function setExtrasValue(val) {
-        db.settings.extraRunVal = val;
-        saveDB();
-        // Update UI immediately
-        document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
-        document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
-        // Re-render score because calculation might change
-        render();
-    }
-
-    function saveName() {
-        const match = getActiveMatch();
-        const newName = document.getElementById('renameInput').value;
-        if(match && newName) {
-            match.name = newName;
-            saveDB();
-            render();
-            closeModal('settingsModal');
-        }
-    }
-
-    function toggleTheme() {
-        db.theme = db.theme === 'light' ? 'dark' : 'light';
-        saveDB();
-        applyTheme();
-    }
-
-    function applyTheme() {
-        document.documentElement.setAttribute('data-theme', db.theme || 'light');
-    }
-
-    function factoryReset() {
-        if(confirm("DELETE EVERYTHING? This cannot be undone.")) {
-            localStorage.removeItem('cricket_pro_v4');
-            location.reload();
-        }
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('open');
-    }
-
-    // --- Match Logic ---
-    function createNewMatch(isInit = false) {
-        const newId = Date.now();
-        const matchNum = db.matches ? db.matches.length + 1 : 1;
-        const newMatch = {
-            id: newId,
-            name: `Match ${matchNum}`,
-            date: new Date().toLocaleDateString(),
-            inn1: [], inn2: [], activeInn: 1
-        };
-        
-        if(!db.matches) db.matches = [];
-        db.matches.push(newMatch);
-        db.activeId = newId;
-        saveDB();
-        
-        if(!isInit) {
-            closeModal('matchModal');
-            render();
-        }
-    }
-
-    function switchMatch(id) {
-        db.activeId = id;
-        saveDB();
-        closeModal('matchModal');
-        render();
-    }
-
-    function deleteMatch() {
-        if(confirm("Delete this match?")) {
-            db.matches = db.matches.filter(m => m.id !== db.activeId);
-            if(db.matches.length === 0) createNewMatch(true);
-            else db.activeId = db.matches[0].id;
-            saveDB();
-            render();
-        }
-    }
-
-    function toggleInnings() {
-        const match = getActiveMatch();
-        match.activeInn = match.activeInn === 1 ? 2 : 1;
-        saveDB();
-        render();
-    }
-
-    function openMatchMenu() {
-        const container = document.getElementById('matchListContainer');
-        container.innerHTML = '';
-        db.matches.slice().reverse().forEach(m => {
-            const div = document.createElement('div');
-            const isActive = m.id === db.activeId;
-            const score1 = calcScore(m.inn1);
-            const score2 = calcScore(m.inn2);
-            
-            div.className = `list-item ${isActive ? 'active' : ''}`;
-            div.innerHTML = `
-                <div>
-                    <strong>${m.name}</strong>
-                    <div style="font-size:0.75rem; opacity:0.7;">
-                        Inn1: ${score1.runs}/${score1.wickets} | Inn2: ${score2.runs}/${score2.wickets}
-                    </div>
-                </div>
-            `;
-            div.onclick = () => switchMatch(m.id);
-            container.appendChild(div);
-        });
-        document.getElementById('matchModal').classList.add('open');
+        // Apply Active
+        if (modifier === 'NB') document.getElementById('btn-nb').className = 'key btn-ex active-nb';
+        if (modifier === 'RO') document.getElementById('btn-ro').className = 'key mod-btn ro active-ro';
+        if (modifier === 'LB') document.getElementById('btn-lb').className = 'key mod-btn active-lb';
     }
 
     // --- Scoring Logic ---
     function press(val) {
         let entry = val;
-        if (isNbActive) {
-            entry = { type: 'NB', val: val };
-            isNbActive = false; 
-            updateNBButton();
+        
+        // 1. Handle Modifiers
+        if (modifier) {
+            entry = { type: modifier, val: val };
+            // Auto-reset modifier after press?
+            // Usually yes for speed.
+            modifier = null; 
+            updateKeypadVisuals();
         }
+
+        // 2. Add to stack
         const match = getActiveMatch();
         (match.activeInn === 1 ? match.inn1 : match.inn2).push(entry);
         saveDB();
         render();
     }
 
-    function toggleNB() {
-        isNbActive = !isNbActive;
-        updateNBButton();
-    }
-
-    function updateNBButton() {
-        const btn = document.getElementById('btn-nb');
-        if (isNbActive) {
-            btn.classList.add('active-mode');
-            btn.innerText = "NB (+Run)";
-        } else {
-            btn.classList.remove('active-mode');
-            btn.innerText = "NB";
-        }
-    }
-
     function undo() {
         const stack = getCurrentBallStack();
         if (stack.length > 0) {
             stack.pop();
-            isNbActive = false;
-            updateNBButton();
+            modifier = null; // Safety reset
+            updateKeypadVisuals();
             saveDB();
             render();
         }
     }
 
-    // --- Stats & Rendering ---
+    // --- Rendering / Calculation ---
     function calcScore(stack) {
         let r = 0, w = 0, legal = 0;
-        let balls = [], history = [];
-        let cur = [];
-        // Get Extra Value from Settings (Default 1)
-        const extraVal = (db.settings && db.settings.extraRunVal !== undefined) ? db.settings.extraRunVal : 1;
+        let cur = [], history = [];
+        const exVal = (db.settings && db.settings.extraRunVal !== undefined) ? db.settings.extraRunVal : 1;
 
         stack.forEach(e => {
             let isL = false, d = e;
-            if(typeof e === 'object' && e.type === 'NB') {
-                r += extraVal; // Use dynamic value
-                if(typeof e.val === 'number') { r += e.val; d = e.val+"nb"; }
-                else if(e.val === 'W' || e.val === 'RO') { w++; d = "NB+W"; }
-                else d = "NB";
-            } else {
-                if(typeof e === 'number') { r += e; isL = true; }
-                else if(e === 'W' || e === 'RO') { w++; isL = true; }
-                else if(e === 'WD') { r += extraVal; } // Use dynamic value
-                else if(e === 'LB') { isL = true; } // Legal
+
+            // Handle Object Entries (Modifiers)
+            if (typeof e === 'object' && e !== null) {
+                // --- NB Logic ---
+                if (e.type === 'NB') {
+                    r += exVal; // Penalty
+                    if (typeof e.val === 'number') { r += e.val; d = e.val + "nb"; } // Bat runs
+                    else if (e.val === 'W') { w++; d = "NB+W"; } // Bowled/Catch on NB? (Rare, but possible as Runout usually)
+                    else { d = "NB"; }
+                    isL = false;
+                }
+                // --- RO Logic ---
+                else if (e.type === 'RO') {
+                    // Run out implies wicket AND potentially runs completed
+                    w++;
+                    isL = true; // Run out is a legal ball
+                    if (typeof e.val === 'number') {
+                        r += e.val; // Runs completed
+                        d = e.val > 0 ? `${e.val}+W` : "W";
+                    } else {
+                        d = "W";
+                    }
+                }
+                // --- LB Logic ---
+                else if (e.type === 'LB') {
+                    // Leg Bye: Legal ball, Runs count as extras
+                    isL = true;
+                    if (typeof e.val === 'number') {
+                        r += e.val;
+                        d = e.val + "lb";
+                    }
+                }
+            } 
+            // Handle Simple Entries
+            else {
+                if (typeof e === 'number') { r += e; isL = true; }
+                else if (e === 'W') { w++; isL = true; }
+                else if (e === 'WD') { r += exVal; isL = false; } // Wide
             }
-            
+
             cur.push(d);
-            if(isL) legal++;
-            if(legal > 0 && legal % 6 === 0 && isL) {
+            if (isL) legal++;
+            if (legal > 0 && legal % 6 === 0 && isL) {
                 history.unshift({ n: legal/6, b: [...cur] });
                 cur = [];
             }
@@ -505,10 +415,16 @@
         strip.innerHTML = '';
         stats.cur.forEach(b => {
             const div = document.createElement('div');
-            let isNb = (typeof b === 'string' && b.indexOf('nb') > -1);
-            div.className = `ball-circle ${
-                b==='W'?'w':(b==='RO'?'ro':(b===4||b===6||b==='4nb'||b==='6nb')?'boundary':isNb?'nb':'')
-            }`;
+            // Style logic
+            let type = '';
+            let txt = b.toString();
+            
+            if (txt.includes('nb')) type = 'nb';
+            else if (txt.includes('lb')) type = 'lb';
+            else if (txt.includes('W')) type = 'w'; // Covers W and RO
+            else if (b === 4 || b === 6) type = 'boundary';
+            
+            div.className = `ball-circle ${type}`;
             div.innerText = b;
             strip.appendChild(div);
         });
@@ -522,6 +438,93 @@
             histDiv.appendChild(row);
         });
     }
+
+    // --- Settings / Modals ---
+    function openSettings() {
+        const match = getActiveMatch();
+        if(match) document.getElementById('renameInput').value = match.name;
+        
+        const val = db.settings.extraRunVal;
+        document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
+        document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
+
+        document.getElementById('settingsModal').classList.add('open');
+    }
+
+    function setExtrasValue(val) {
+        db.settings.extraRunVal = val;
+        saveDB();
+        document.getElementById('extra0').className = `toggle-btn ${val === 0 ? 'selected' : ''}`;
+        document.getElementById('extra1').className = `toggle-btn ${val === 1 ? 'selected' : ''}`;
+        render();
+    }
+
+    function saveName() {
+        const match = getActiveMatch();
+        const newName = document.getElementById('renameInput').value;
+        if(match && newName) {
+            match.name = newName;
+            saveDB();
+            render();
+            closeModal('settingsModal');
+        }
+    }
+
+    function toggleTheme() {
+        db.theme = db.theme === 'light' ? 'dark' : 'light';
+        saveDB();
+        applyTheme();
+    }
+    function applyTheme() { document.documentElement.setAttribute('data-theme', db.theme || 'light'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // --- Match Manager ---
+    function createNewMatch(isInit = false) {
+        const newId = Date.now();
+        const matchNum = db.matches ? db.matches.length + 1 : 1;
+        const newMatch = {
+            id: newId, name: `Match ${matchNum}`, date: new Date().toLocaleDateString(),
+            inn1: [], inn2: [], activeInn: 1
+        };
+        if(!db.matches) db.matches = [];
+        db.matches.push(newMatch);
+        db.activeId = newId;
+        saveDB();
+        if(!isInit) { closeModal('matchModal'); render(); }
+    }
+    function switchMatch(id) { db.activeId = id; saveDB(); closeModal('matchModal'); render(); }
+    function deleteMatch() {
+        if(confirm("Delete this match?")) {
+            db.matches = db.matches.filter(m => m.id !== db.activeId);
+            if(db.matches.length === 0) createNewMatch(true);
+            else db.activeId = db.matches[0].id;
+            saveDB();
+            closeModal('settingsModal');
+            render();
+        }
+    }
+    function toggleInnings() {
+        const match = getActiveMatch();
+        match.activeInn = match.activeInn === 1 ? 2 : 1;
+        saveDB();
+        render();
+    }
+    function openMatchMenu() {
+        const container = document.getElementById('matchListContainer');
+        container.innerHTML = '';
+        db.matches.slice().reverse().forEach(m => {
+            const div = document.createElement('div');
+            const isActive = m.id === db.activeId;
+            const s1 = calcScore(m.inn1);
+            const s2 = calcScore(m.inn2);
+            div.className = `list-item ${isActive ? 'active' : ''}`;
+            div.innerHTML = `<div><strong>${m.name}</strong><div style="font-size:0.75rem;opacity:0.7;">Inn1:${s1.runs}/${s1.wickets} • Inn2:${s2.runs}/${s2.wickets}</div></div>`;
+            div.onclick = () => switchMatch(m.id);
+            container.appendChild(div);
+        });
+        document.getElementById('matchModal').classList.add('open');
+    }
+    function factoryReset() { if(confirm("Clear All Data?")) { localStorage.removeItem('cricket_pro_v5'); location.reload(); } }
 </script>
 </body>
 </html>
